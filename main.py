@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests as re
+import sys
 
 link = "https://conwaylife.com/patterns/"
 page = re.get(link)
@@ -13,8 +14,10 @@ pattern_names = [link[32:-6] for link in cell_links]
 
 patterns = {}
 
+print("Downloading patterns.")
+
 for i, cell_link in enumerate(cell_links):
-    if i == 1:
+    if i > 1:
         break
     cell_page = re.get(cell_link)
     cell_soup = BeautifulSoup(cell_page.text, "lxml")
@@ -22,14 +25,27 @@ for i, cell_link in enumerate(cell_links):
     pattern = list(filter(lambda line: line != '' and line[0] != '!', cell_lines))
     pattern = [list(map(lambda char: char == 'O', filter(lambda char: char != '\r', [*row]))) for row in pattern]
     patterns[pattern_names[i]] = pattern
+    print(str(i + 1) + " out of " + str(len(cell_links)) + " (" + pattern_names[i] + ")")
 
-for row in patterns["101"]:
-    print(''.join(['0' if cell else '.' for cell in row]))
+text = ['{', '}']
 
-#TODO
-#   Make "Pattern" class with the following attributes:
-#       - width
-#       - height
-#       - pattern_data (booleans)
-#       - active_cells
-#       - n_active_cells
+for idx, pattern in enumerate(patterns):
+    line = '"{pattern}": Array[Vector2i](['.format(pattern=pattern)
+
+    for y, i in enumerate(patterns[pattern]):
+        for x, j in enumerate(i):
+            if j:
+                line += "Vector2i({x}, {y}), ".format(x=x, y=y)
+
+    line = line[:-2]
+    line += "]),"
+    text.insert(-1, line)
+
+    print(str(idx + 1) + " out of " + str(len(patterns)) + " (" + pattern_names[idx] + ")")
+
+text[-2] = text[-2][:-1]
+
+print("\n".join(text))
+
+with open("patterns", "w") as file:
+    file.write("\n".join(text))
