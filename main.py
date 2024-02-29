@@ -2,11 +2,12 @@ from bs4 import BeautifulSoup
 import requests as re
 import sys
 
-link = "https://conwaylife.com/patterns/"
-page = re.get(link)
-soup = BeautifulSoup(page.text, "lxml")
 
-links = ["https://conwaylife.com" + pattern.get("href") for pattern in soup.select("a")]
+def get_html(link: str) -> BeautifulSoup:
+    page = re.get(link)
+    return BeautifulSoup(page.text, "lxml")
+
+links = ["https://conwaylife.com" + pattern.get("href") for pattern in get_html("https://conwaylife.com/patterns/").select("a")]
 
 cell_links = list(filter(lambda link: link[-6:] == ".cells",links))
 
@@ -19,9 +20,7 @@ print("Downloading patterns.")
 for i, cell_link in enumerate(cell_links):
     if i > 1:
         break
-    cell_page = re.get(cell_link)
-    cell_soup = BeautifulSoup(cell_page.text, "lxml")
-    cell_lines = cell_soup.select_one("p").text.split("\n")
+    cell_lines = get_html(cell_link).select_one("p").text.split("\n")
     pattern = list(filter(lambda line: line != '' and line[0] != '!', cell_lines))
     pattern = [list(map(lambda char: char == 'O', filter(lambda char: char != '\r', [*row]))) for row in pattern]
     patterns[pattern_names[i]] = pattern
