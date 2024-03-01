@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 import requests as re
-import sys
 
 
 def get_html(link: str) -> BeautifulSoup:
