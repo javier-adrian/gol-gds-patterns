@@ -6,6 +6,7 @@ def get_html(link: str) -> BeautifulSoup:
     page = re.get(link)
     return BeautifulSoup(page.text, "lxml")
 
+
 links = ["https://conwaylife.com" + pattern.get("href") for pattern in get_html("https://conwaylife.com/patterns/").select("a")]
 
 cell_links = list(filter(lambda link: link[-6:] == ".cells",links))
